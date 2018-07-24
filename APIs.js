@@ -153,8 +153,38 @@ module.exports=function(app){
 		});
 	});
 	
-	//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-
+	app.get('/api/getPhaseList', function (req, res) {
+		connection.query(querySQL.smartContract,[1],function (error, results) {
+			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			var preSaleStartDate = 0,
+				preSaleEndDate = 0,
+				publicSaleStartDate = 0,
+				publicSaleEndDate = 0;
+				
+			phaseBonus.methods.getPhaseSale(1,0).call().then(result=>{
+				preSaleStartDate=result;
+			}).then(()=>{
+				phaseBonus.methods.getPhaseSale(1,1).call().then(result=>{
+					preSaleEndDate = result;
+				});			
+			}).then(()=>{
+				phaseBonus.methods.getPhaseSale(2,0).call().then(result=>{
+					publicSaleStartDate = result;
+				});	
+			}).then(()=>{
+				phaseBonus.methods.getPhaseSale(2,1).call().then(result=>{
+					publicSaleEndDate = result;
+					var jsonPreSale = {"PhaseName" :"Pre-Sale","StartDate" : preSaleStartDate,"EndDate" : preSaleEndDate},
+					jsonPublicSale = {"PhaseName" :"Public Sale","StartDate" : publicSaleStartDate,"EndDate" : publicSaleEndDate};
+					
+					var statusCode = (res.statusCode==200)? true : false;
+					var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+					var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null ;
+					res.send(helper.response(statusCode,message,value));
+				});	
+			});
+		});
+	});
 	// app.get("/api/generaWallet",function(req, res){
 	// 	var statusCode = (res.statusCode==200)? true : false;
 	// 	var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
