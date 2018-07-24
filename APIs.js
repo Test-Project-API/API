@@ -166,22 +166,49 @@ module.exports=function(app){
 			}).then(()=>{
 				phaseBonus.methods.getPhaseSale(1,1).call().then(result=>{
 					preSaleEndDate = result;
-				});			
+				}).then(()=>{
+					phaseBonus.methods.getPhaseSale(2,0).call().then(result=>{
+						publicSaleStartDate = result;
+					}).then(()=>{
+						phaseBonus.methods.getPhaseSale(2,1).call().then(result=>{
+							publicSaleEndDate = result;
+							var jsonPreSale = {"PhaseName" :"Pre-Sale","StartDate" : preSaleStartDate,"EndDate" : preSaleEndDate},
+							jsonPublicSale = {"PhaseName" :"Public Sale","StartDate" : publicSaleStartDate,"EndDate" : publicSaleEndDate};
+							
+							var statusCode = (res.statusCode==200)? true : false;
+							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+							var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null ;
+							res.send(helper.response(statusCode,message,value));
+						});	
+					});
+				});
+			});
+		});
+	});
+	
+	app.get('/api/getBonusList', function(req, res){
+		connection.query(querySQL.smartContract,[1],function (error, results) {
+			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			var preSaleBonus1 = 0,
+				preSaleBonus2 = 0,
+				publicSaleBonus = 0;
+			phaseBonus.methods.getBonusSale(1,0).call().then(result=>{
+				preSaleBonus1 = result;
 			}).then(()=>{
-				phaseBonus.methods.getPhaseSale(2,0).call().then(result=>{
-					publicSaleStartDate = result;
-				});	
-			}).then(()=>{
-				phaseBonus.methods.getPhaseSale(2,1).call().then(result=>{
-					publicSaleEndDate = result;
-					var jsonPreSale = {"PhaseName" :"Pre-Sale","StartDate" : preSaleStartDate,"EndDate" : preSaleEndDate},
-					jsonPublicSale = {"PhaseName" :"Public Sale","StartDate" : publicSaleStartDate,"EndDate" : publicSaleEndDate};
-					
-					var statusCode = (res.statusCode==200)? true : false;
-					var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-					var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null ;
-					res.send(helper.response(statusCode,message,value));
-				});	
+				phaseBonus.methods.getBonusSale(1,1).call().then(result=>{
+					preSaleBonus2 = result;
+				}).then(()=>{
+					phaseBonus.methods.getBonusSale(2,0).call().then(result=>{
+						var statusCode = (res.statusCode==200)? true : false;
+						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+						publicSaleBonus = result;
+						var jsonPreSale = {"PhaseName" :"Pre-Sale","Bonus" : [preSaleBonus1,preSaleBonus2]},
+						jsonPublicSale = {"PhaseName" :"Public Sale","Bonus" : [publicSaleBonus]};
+						
+						var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null;
+						res.send(helper.response(statusCode,message,value));
+					});
+				});
 			});
 		});
 	});
