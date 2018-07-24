@@ -245,7 +245,22 @@ module.exports=function(app){
 			res.send(helper.response(statusCode,message,true));
 		});
 	});
-	
+	app.post('/api/setBonus', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+
+		var isParameter=helper.isParameter(req.body, ['phase','index','bonus']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		connection.query(querySQL.smartContract,[1],function (error, results) {
+			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			var bonusFunc = phaseBonus.methods.setBonusSale(req.body.phase,req.body.index,req.body.bonus).encodeABI();
+			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), bonusFunc);
+			res.send(helper.response(statusCode,message,true));
+		});
+	});
 	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
