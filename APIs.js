@@ -233,6 +233,72 @@ module.exports=function(app){
 			});
 		});
 	});
+	app.post('/api/setPhase', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+
+		var isParameter=helper.isParameter(req.body, ['phase','startDate','endDate']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		connection.query(querySQL.smartContract,[1],function (error, results) {
+			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			
+			var setStart = phaseBonus.methods.setPhaseSale(req.body.phase,0,req.body.startDate).encodeABI(),
+			setEnd = phaseBonus.methods.setPhaseSale(req.body.phase,1,req.body.endDate).encodeABI();
+			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setStart);
+			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setEnd);
+			res.send(helper.response(statusCode,message,true));
+		});
+	});
+	
+	
+	function descryptionPrivateKey(key){
+		return helper.descrypt(config.keyRandom.key,key);
+	}
+	
+	/* from : owner address
+	*	to : contact Address
+	*	privateKeyy
+	*	function smartContract
+	*/
+	function sendSignedTransaction(from, to, privateKeyy, data=null, value=null, gasPrice=null, gasLimit=null){
+		try{
+			return new Promise(async (resolve, reject) => {
+				var rawTx = {
+					from: from,
+					to: to,
+				};
+				var gasprice = (gasPrice==null? 20 : 20);
+				if(data)
+				rawTx.data=data;
+				if(value)
+				rawTx.value=value;
+				web3.eth.getGasPrice().then(result=>{
+					gasprice=web3.utils.fromWei(result, 'Gwei');
+				});
+				if(!gasLimit){
+					gasLimit = await web3.eth.estimateGas(rawTx);
+				}
+
+				var nonce = await web3.eth.getTransactionCount(from, "pending");
+				rawTx.nonce=web3.utils.toHex(nonce);
+				rawTx.gasPrice=web3.utils.toHex(gasprice);
+				rawTx.gasLimit=web3.utils.toHex(gasLimit);
+
+				var privateKey = new Buffer(privateKeyy, 'hex');
+
+				var tx = new Tx(rawTx);
+				tx.sign(privateKey);
+
+				var serializedTx = tx.serialize();
+				web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+			});
+		}catch(err){
+			//console.log(error);
+		}
+	}
 	/*
 	app.get('/api/getBalance', function (req, res) {
 		//console.log("aaa");
