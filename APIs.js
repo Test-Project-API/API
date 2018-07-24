@@ -212,24 +212,27 @@ module.exports=function(app){
 			});
 		});
 	});
-	// app.get("/api/generaWallet",function(req, res){
-	// 	var statusCode = (res.statusCode==200)? true : false;
-	// 	var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-	// 	var value = (res.statusCode==200)? eth.accounts.create(web3.utils.randomHex(32)) : null ;
-	// 	// var obj = JSON.parse(value);
-
-	// 	// var obj = JSON.parse(valu);
-	// 	// var privateKeyNotEncrytion = json.Value.privateKey;
-	// 	// var privateKeyEncryption = helper.encrypt(key,json.Value.privateKey);
-	// 	// console.log(privateKeyEncryption);
-	// 	// var obj = JSON.parse(privateKeyEncryption);
-	// 	// obj['Value'].push({"privateKeyEncryption":privateKeyEncryption});
-	// 	// jsonStr = JSON.stringify(obj);
-
-	// 	res.send(helper.response(statusCode,message,value));
-	// });
-	
-	
+	app.get('/api/getBonusAffilate', function(req, res){
+		connection.query(querySQL.smartContract,[1],function (error, results) {
+			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			var preSale = 0,
+			publicSale =0;
+			phaseBonus.methods.getBonusAffiliate(1).call().then(result=>{
+				preSale = result;
+			}).then(()=>{
+				phaseBonus.methods.getBonusAffiliate(1).call().then(result=>{
+					var statusCode = (res.statusCode==200)? true : false;
+					var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+					publicSale = result;
+					var jsonPreSale = {"PhaseName" :"Pre-Sale","Bonus" : preSale},
+					jsonPublicSale = {"PhaseName" :"Public Sale","Bonus" : publicSale};
+							
+					var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null;
+					res.send(helper.response(statusCode,message,value));
+				});
+			});
+		});
+	});
 	/*
 	app.get('/api/getBalance', function (req, res) {
 		//console.log("aaa");
