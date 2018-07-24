@@ -152,6 +152,8 @@ module.exports=function(app){
 			});
 		});
 	});
+	
+	//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 	// app.get("/api/generaWallet",function(req, res){
 	// 	var statusCode = (res.statusCode==200)? true : false;
