@@ -213,7 +213,7 @@ module.exports=function(app){
 			phaseBonus.methods.getBonusAffiliate(1).call().then(result=>{
 				preSale = result;
 			}).then(()=>{
-				phaseBonus.methods.getBonusAffiliate(1).call().then(result=>{
+				phaseBonus.methods.getBonusAffiliate(2).call().then(result=>{
 					var statusCode = (res.statusCode==200)? true : false;
 					var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 					publicSale = result;
