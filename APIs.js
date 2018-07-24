@@ -28,13 +28,6 @@ var querySQL = {
 	smartContract : "SELECT * FROM `smartcontract` WHERE `SmartContractID`=?"
 };
 
-
-/*var TokenContract = new web3.eth.Contract(config.smartcontract.tokenContract.abi, config.smartcontract.tokenContract.address);
-var IcoContract = new web3.eth.Contract(config.smartcontract.icoContract.abi, config.smartcontract.icoContract.address);
-var IcoPhase = new web3.eth.Contract(config.smartcontract.icoPhase.abi, config.smartcontract.icoPhase.address);
-var IcoBonus = new web3.eth.Contract(config.smartcontract.icoBonus.abi, config.smartcontract.icoBonus.address);
-*/
-
 module.exports=function(app){
 	
 	app.get('/', function (req, res) {
@@ -300,112 +293,6 @@ module.exports=function(app){
 		}
 	}
 	/*
-	app.get('/api/getBalance', function (req, res) {
-		//console.log("aaa");
-
-		var isParameter=helper.isParameter(req.query, ['currency',"address"]);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-		}
-
-		var currency = req.query.currency,
-		address = req.query.address;
-		if(currency=="eth"){
-			var balance = web3.eth.getBalance(address);
-			balance.then(function(value){
-				var statusCode = (res.statusCode==200)? true : false;
-				var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-				var value = (res.statusCode==200)? web3.utils.fromWei(value,'ether') : null ;
-				res.send(helper.response(statusCode,message,value));
-			});
-			}if(currency=="cgn"){
-			TokenContract.methods.balanceOf("0xEf5e98DE54c63700749eCEE7f30948C103B3756C").call().then(result=>{
-				var statusCode = (res.statusCode==200)? true : false;
-				var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-				var value = (res.statusCode==200)? web3.utils.fromWei(result,'ether') : null ;
-				res.send(helper.response(statusCode,message,value));
-			});
-		}
-	});
-	*/
-	/*Phase API*/
-	/*
-	app.post("/api/setPhasePresale",function (req, res) {
-		var isParameter=helper.isParameter(req.body, ['from',"to"]);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-			}else{
-			var funcData =	IcoPhase.methods.setPhasePresale(req.body.from,req.body.to).encodeABI();
-			var statusCode = (res.statusCode==200)? true : false;
-			var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-			sendSignedTransaction(config.smartcontract.icoPhase.owner.address, config.smartcontract.icoPhase.address, config.smartcontract.icoPhase.owner.privateKey, funcData).then(result=>{
-				res.send(helper.response(statusCode,message,result));
-			});
-		}
-	});
-	app.post("/api/setPhasePublicSale1",function (req, res) {
-		var isParameter=helper.isParameter(req.body, ['from',"to"]);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-			}else{
-			var funcData =	IcoPhase.methods.setPhasePublicSale1(req.body.from,req.body.to).encodeABI();
-			var statusCode = (res.statusCode==200)? true : false;
-			var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-			sendSignedTransaction(config.smartcontract.icoPhase.owner.address, config.smartcontract.icoPhase.address, config.smartcontract.icoPhase.owner.privateKey, funcData).then(result=>{
-				res.send(helper.response(statusCode,message,result));
-			});
-		}
-	});
-	app.post("/api/setPhasePublicSale2",function (req, res) {
-		var isParameter=helper.isParameter(req.body, ['from',"to"]);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-			}else{
-			var funcData =	IcoPhase.methods.setPhasePublicSale2(req.body.from,req.body.to).encodeABI();
-			var statusCode = (res.statusCode==200)? true : false;
-			var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-			sendSignedTransaction(config.smartcontract.icoPhase.owner.address, config.smartcontract.icoPhase.address, config.smartcontract.icoPhase.owner.privateKey, funcData).then(result=>{
-				res.send(helper.response(statusCode,message,result));
-			});
-		}
-	});
-	app.post("/api/setPhasePublicSale3",function (req, res) {
-		var isParameter=helper.isParameter(req.body, ['from',"to"]);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-			}else{
-			var funcData =	IcoPhase.methods.setPhasePublicSale3(req.body.from,req.body.to).encodeABI();
-			var statusCode = (res.statusCode==200)? true : false;
-			var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-			sendSignedTransaction(config.smartcontract.icoPhase.owner.address, config.smartcontract.icoPhase.address, config.smartcontract.icoPhase.owner.privateKey, funcData).then(result=>{
-				res.send(helper.response(statusCode,message,result));
-			});
-		}
-	});
-
-	app.get("/api/getCurrentICOPhase",function (req, res) {
-		var statusCode = (res.statusCode==200)? true : false;
-		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-		IcoPhase.methods.getCurrentICOPhase().call().then(result=>{
-			res.send(helper.response(statusCode,message,result));
-		});
-	});
-
-	app.get("/api/aaaa",function (req, res) {
-		var statusCode = (res.statusCode==200)? true : false;
-		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-		IcoBonus.methods.getBonusByETH(200).call().then(result=>{
-			console.log(result);
-			//res.send(helper.response(statusCode,message,result));
-		});
-	});
-
-
 	// helper for Web3
 	app.get("/api/getCurrenGas",function(req,res){
 		var statusCode = (res.statusCode==200)? true : false;
@@ -442,43 +329,5 @@ module.exports=function(app){
 			}
 		}
 	});
-
-	//custome function
-	function sendSignedTransaction(from, to, privateKeyy, data=null, value=null, gasPrice=null, gasLimit=null){
-		try{
-			return new Promise(async (resolve, reject) => {
-				var rawTx = {
-					from: from,
-					to: to,
-				};
-				var gasprice = (gasPrice==null? 20 : 20);
-				if(data)
-				rawTx.data=data;
-				if(value)
-				rawTx.value=value;
-				web3.eth.getGasPrice().then(result=>{
-					gasprice=web3.utils.fromWei(result, 'Gwei');
-				});
-				if(!gasLimit){
-					gasLimit = await web3.eth.estimateGas(rawTx);
-				}
-
-				var nonce = await web3.eth.getTransactionCount(from, "pending");
-				rawTx.nonce=web3.utils.toHex(nonce);
-				rawTx.gasPrice=web3.utils.toHex(gasprice);
-				rawTx.gasLimit=web3.utils.toHex(gasLimit);
-
-				var privateKey = new Buffer(privateKeyy, 'hex');
-
-				var tx = new Tx(rawTx);
-				tx.sign(privateKey);
-
-				var serializedTx = tx.serialize();
-				web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
-				.on('receipt', result=>resolve(result));
-			});
-			}catch(err){
-			console.log(error);
-		}
 	}*/
 }
