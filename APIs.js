@@ -308,19 +308,11 @@ module.exports=function(app){
 		});
 	});
 	
-	app.post('/api/tokenRate', function(req, res){
+	app.get('/api/tokenRate', function(req, res){
 		var statusCode = (res.statusCode==200)? true : false;
 		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-
-		var isParameter=helper.isParameter(req.body, ['phase']);
-		if(isParameter.length>0){
-			statusCode = 404;
-			res.send("Missing Parameter: "+isParameter.toString());
-		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
-			//console.log(results);
 			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
-			//console.log(cgnContract);
 			cgnContract.methods.getTokenRate(1).call().then(presale=>{
 				cgnContract.methods.getTokenRate(2).call().then(publicsale=>{
 					var presalePrice = {"PhaseName":"Pre-Sale","Price":presale,"Unit":"1eth"},
