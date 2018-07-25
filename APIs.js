@@ -385,7 +385,7 @@ module.exports=function(app){
 		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
 			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
-			var cgnContractFunc = cgnContract.methods.setMinBuy(req.body.phase,req.body.index,web3.utils.toWei(req.body.value)).encodeABI();
+			var cgnContractFunc = cgnContract.methods.setMinBuy(req.body.phase,req.body.index,web3.utils.toWei(req.body.value, 'ether')).encodeABI();
 			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), cgnContractFunc);
 			res.send(helper.response(statusCode,message,true));
 		});
@@ -402,7 +402,7 @@ module.exports=function(app){
 		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
 			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
-			var cgnContractFunc = cgnContract.methods.setMaxBuy(req.body.phase,req.body.index,web3.utils.toWei(req.body.value)).encodeABI();
+			var cgnContractFunc = cgnContract.methods.setMaxBuy(req.body.phase,req.body.index,web3.utils.toWei(req.body.value, 'ether')).encodeABI();
 			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), cgnContractFunc);
 			res.send(helper.response(statusCode,message,true));
 		});
