@@ -279,6 +279,34 @@ module.exports=function(app){
 		});
 	});
 	
+	app.post('/api/tokenSupply', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+
+		var isParameter=helper.isParameter(req.body, ['phase']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		connection.query(querySQL.smartContract,[2],function (error, results) {
+			//console.log(results);
+			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			//console.log(cgnContract);
+			cgnContract.methods.getPhaseSupply(req.body.phase).call().then(result1=>{
+				if(req.body.phase==1){
+					cgnContract.methods.getPhaseSold(req.body.phase).call().then(result2=>{
+						var supplyPhase = {"PhaseName":"Pre-Sale","Supply":web3.utils.fromWei(result1,"ether"),"CurrentSupply":result2};
+						res.send(helper.response(statusCode,message,supplyPhase));
+					});
+				}else if(req.body.phase==2){
+					cgnContract.methods.getPhaseSold(req.body.phase).call().then(result2=>{
+						var supplyPhase = {"PhaseName":"Public Sale","Supply":web3.utils.fromWei(result1,"ether"),"CurrentSupply":result2};
+						res.send(helper.response(statusCode,message,supplyPhase));
+					});
+				}
+			});
+		});
+	});
 	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
