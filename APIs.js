@@ -323,6 +323,17 @@ module.exports=function(app){
 		});
 	});
 	
+	app.get('/api/walletFund', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+		connection.query(querySQL.smartContract,[2],function (error, results) {
+			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			cgnContract.methods.getEthFundDeposit().call().then(wallet=>{
+				res.send(helper.response(statusCode,message,wallet));
+			});
+		});
+	});
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
