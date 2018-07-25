@@ -352,6 +352,28 @@ module.exports=function(app){
 		});
 	});
 	
+	app.get('/api/purchaseLimit', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+		connection.query(querySQL.smartContract,[2],function (error, results) {
+			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			cgnContract.methods.getMinBuy(1,0).call().then(minBuy1=>{
+				cgnContract.methods.getMinBuy(1,1).call().then(minBuy2=>{
+					cgnContract.methods.getMinBuy(2,0).call().then(minBuy=>{
+						cgnContract.methods.getMaxBuy(1).call().then(maxBuy1=>{
+							cgnContract.methods.getMaxBuy(2).call().then(maxBuy2=>{
+						var preSale1 = {"PhaseName":"Pre-Sale", "minBuy":web3.utils.fromWei(minBuy1,"ether"),"maxBuy":web3.utils.fromWei(minBuy2),"Unit":"ETH","type":"Company"},
+						preSale2 = {"PhaseName":"Pre-Sale", "minBuy":web3.utils.fromWei(minBuy2),"maxBuy":web3.utils.fromWei(maxBuy1),"Unit":"ETH","type":"Investors"};
+						publicSale = {"PhaseName":"Public Sale", "minBuy":web3.utils.fromWei(minBuy),"maxBuy":web3.utils.fromWei(maxBuy2),"Unit":"ETH","type":"Investors"};
+						res.send(helper.response(statusCode,message,[preSale1,preSale2,publicSale]));
+							});
+						});
+					});
+				});
+			});
+		});
+	});
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
