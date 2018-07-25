@@ -374,7 +374,7 @@ module.exports=function(app){
 		});
 	});
 	
-	app.get('/api/purchaseMin', function(req, res){
+	app.post('/api/purchaseMin', function(req, res){
 		var statusCode = (res.statusCode==200)? true : false;
 		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 
@@ -391,7 +391,7 @@ module.exports=function(app){
 		});
 	});
 	
-	app.get('/api/purchaseMax', function(req, res){
+	app.post('/api/purchaseMax', function(req, res){
 		var statusCode = (res.statusCode==200)? true : false;
 		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 
