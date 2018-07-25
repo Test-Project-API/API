@@ -345,9 +345,10 @@ module.exports=function(app){
 		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
 			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
-			cgnContract.methods.setTokenRate(req.body.phase,req.body.rate).call().then(result1=>{
-				res.send(helper.response(statusCode,message,true));
-			});
+			var cgnContractFunc = cgnContract.methods.setTokenRate(req.body.phase,req.body.rate).encodeABI();
+			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), cgnContractFunc);
+			res.send(helper.response(statusCode,message,true));
+			
 		});
 	});
 	
