@@ -334,6 +334,23 @@ module.exports=function(app){
 		});
 	});
 	
+	app.post('/api/setTokenRate', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+
+		var isParameter=helper.isParameter(req.body, ['phase','rate']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		connection.query(querySQL.smartContract,[2],function (error, results) {
+			var cgnContract = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
+			cgnContract.methods.setTokenRate(req.body.phase,req.body.rate).call().then(result1=>{
+				res.send(helper.response(statusCode,message,true));
+			});
+		});
+	});
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
