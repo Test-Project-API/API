@@ -395,7 +395,7 @@ module.exports=function(app){
 		var statusCode = (res.statusCode==200)? true : false;
 		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 
-		var isParameter=helper.isParameter(req.body, ['phase','index','value']);
+		var isParameter=helper.isParameter(req.body, ['phase','value']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
