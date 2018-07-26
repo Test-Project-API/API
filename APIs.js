@@ -233,11 +233,11 @@ module.exports=function(app){
 			
 			var setStart = phaseBonus.methods.setPhaseSale(req.body.phase,0,req.body.startDate).encodeABI(),
 			setEnd = phaseBonus.methods.setPhaseSale(req.body.phase,1,req.body.endDate).encodeABI();
-			new Promise(async (resolve, reject) => {
-			 await sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setStart);
+			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setStart);
+			setTimeout(function(){
 			 sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setEnd);
-				res.send(helper.response(statusCode,message,true));
-			});
+			},4000});
+			res.send(helper.response(statusCode,message,true));
 		});
 	});
 	app.post('/api/setBonus', function(req, res){
