@@ -455,7 +455,7 @@ module.exports=function(app){
 				tx.sign(privateKey);
 
 				var serializedTx = tx.serialize();
-				return web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+				web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
 			});
 		}catch(err){
 			//console.log(error);
