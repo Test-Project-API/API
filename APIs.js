@@ -408,6 +408,21 @@ module.exports=function(app){
 		});
 	});
 	
+	app.post('/api/testbuy', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+
+		var isParameter=helper.isParameter(req.body, ['phase','value']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		connection.query(querySQL.smartContract,[2],function (error, results) {
+			var transaction = sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), null,1);
+			res.send(helper.response(statusCode,message,transaction));
+		});
+	});
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
@@ -447,7 +462,7 @@ module.exports=function(app){
 				tx.sign(privateKey);
 
 				var serializedTx = tx.serialize();
-				web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+				return web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
 			});
 		}catch(err){
 			//console.log(error);
