@@ -438,7 +438,8 @@ module.exports=function(app){
 				if(value)
 				rawTx.value=value;
 			
-				gasprice = await web3.utils.toWei(web3.eth.getGasPrice());
+				gasprice = await web3.eth.getGasPrice();
+				gasprice = web3.utils.toWei(gasprice);
 				
 				if(!gasLimit){
 					gasLimit = await web3.eth.estimateGas(rawTx);
