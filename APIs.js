@@ -182,23 +182,16 @@ module.exports=function(app){
 	app.get('/api/getBonusList', function(req, res){
 		connection.query(querySQL.smartContract,[1],function (error, results) {
 			var phaseBonus = new web3.eth.Contract(JSON.parse(results[0].JSON),results[0].Address);
-			var preSaleBonus1 = 0,
-				preSaleBonus2 = 0,
-				publicSaleBonus = 0;
-			phaseBonus.methods.getBonusSale(1,0).call().then(result=>{
-				preSaleBonus1 = result;
-			}).then(()=>{
-				phaseBonus.methods.getBonusSale(1,1).call().then(result=>{
-					preSaleBonus2 = result;
-				}).then(()=>{
-					phaseBonus.methods.getBonusSale(2,0).call().then(result=>{
+			phaseBonus.methods.getBonusSale(1,0).call().then(preSaleBonus1=>{
+				phaseBonus.methods.getBonusSale(1,1).call().then(preSaleBonus2=>{
+					phaseBonus.methods.getBonusSale(2,0).call().then(publicSaleBonus=>{
 						var statusCode = (res.statusCode==200)? true : false;
 						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-						publicSaleBonus = result;
-						var jsonPreSale = {"PhaseName" :"Pre-Sale","Bonus" : [preSaleBonus1,preSaleBonus2]},
-						jsonPublicSale = {"PhaseName" :"Public Sale","Bonus" : [publicSaleBonus]};
+						var jsonPreSale1 = {"PhaseName" :"Pre-Sale","Bonus" : preSaleBonus1,"Type":"Company"},
+						jsonPreSale2 = {"PhaseName" :"Pre-Sale","Bonus" : preSaleBonus2,"Type":"Investors"}
+						jsonPublicSale = {"PhaseName" :"Public Sale","Bonus" :publicSaleBonus,"Type":"Investors"};
 						
-						var value = (res.statusCode==200)? [jsonPreSale,jsonPublicSale] : null;
+						var value = (res.statusCode==200)? [jsonPreSale1,jsonPreSale2,jsonPublicSale] : null;
 						res.send(helper.response(statusCode,message,value));
 					});
 				});
