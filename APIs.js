@@ -412,7 +412,8 @@ module.exports=function(app){
 		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
 			var transaction = sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), null,1);
-			res.send(helper.response(statusCode,message,transaction));
+			var abc = web3.eth.getTransaction(transaction);
+			res.send(helper.response(statusCode,message,abc));
 		});
 	});
 	
