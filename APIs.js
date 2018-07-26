@@ -236,7 +236,7 @@ module.exports=function(app){
 			sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setStart);
 			setTimeout(function(){
 			 sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), setEnd);
-			},4000);
+			},10000);
 			res.send(helper.response(statusCode,message,true));
 		});
 	});
