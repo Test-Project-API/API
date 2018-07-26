@@ -411,7 +411,7 @@ module.exports=function(app){
 			res.send("Missing Parameter: "+isParameter.toString());
 		}
 		connection.query(querySQL.smartContract,[2],function (error, results) {
-			var transaction = sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), null,web3.utils.toWei(1,'ether'));
+			var transaction = sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), null,1);
 			var abc = web3.eth.getTransaction(transaction);
 			res.send(helper.response(statusCode,message,abc));
 		});
