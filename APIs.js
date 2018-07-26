@@ -437,25 +437,24 @@ module.exports=function(app){
 				rawTx.data=data;
 				if(value)
 				rawTx.value=value;
-				web3.eth.getGasPrice().then(result=>{
-					gasprice=web3.utils.fromWei(result, 'Gwei');
-				});
+			
+				
+				
 				if(!gasLimit){
 					gasLimit = await web3.eth.estimateGas(rawTx);
 				}
-
-				var nonce = await web3.eth.getTransactionCount(from, "pending");
-				rawTx.nonce=web3.utils.toHex(nonce);
-				rawTx.gasPrice=web3.utils.toHex(gasprice);
-				rawTx.gasLimit=web3.utils.toHex(gasLimit);
-
-				var privateKey = new Buffer(privateKeyy, 'hex');
-
-				var tx = new Tx(rawTx);
-				tx.sign(privateKey);
-
-				var serializedTx = tx.serialize();
-				web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+				web3.eth.getGasPrice().then(result=>{
+					var nonce = await web3.eth.getTransactionCount(from, "pending");
+					rawTx.nonce=web3.utils.toHex(nonce);
+					gasprice=web3.utils.toWei(result);
+					rawTx.gasPrice=web3.utils.toHex(gasprice);
+					rawTx.gasLimit=web3.utils.toHex(gasLimit);
+					var privateKey = new Buffer(privateKeyy, 'hex');
+					var tx = new Tx(rawTx);
+					tx.sign(privateKey);
+					var serializedTx = tx.serialize();
+					web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+				});
 			});
 		}catch(err){
 			//console.log(error);
