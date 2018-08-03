@@ -403,6 +403,21 @@ module.exports=function(app){
 		});
 	});
 	
+	app.get('/api/isAddress', function(req, res){
+		var statusCode = (res.statusCode==200)? true : false;
+		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+		try{
+			var account = web3.eth.getStorageAt(req.query.address, 0).then(result=>{
+				console.log(result);
+				if(result!=null){
+					res.send(helper.response(statusCode,message,true));
+				}
+			});
+		}catch(err){
+			res.send(helper.response(statusCode,message,false));
+		}
+	});
+	
 	app.post('/api/testbuy', function(req, res){
 		var statusCode = (res.statusCode==200)? true : false;
 		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
