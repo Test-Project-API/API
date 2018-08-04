@@ -419,7 +419,7 @@ module.exports=function(app){
 	});
 	
 	app.post("/api/buyCGN",function(req,res){
-		var isParameter=helper.isParameter(req.body, ['addres','privateKey',"toAddress",'value']);
+		var isParameter=helper.isParameter(req.body, ['addres','privateKey','value']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
