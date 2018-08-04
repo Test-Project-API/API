@@ -453,6 +453,14 @@ module.exports=function(app){
 		});
 	});
 	
+	function gasForATransaction(addressFrom,AddressTo,amount){
+		return web3.eth.estimateGas({
+			from: addressFrom,
+			to: AddressTo,
+			amount: amount
+		});
+	}
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
