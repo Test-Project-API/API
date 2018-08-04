@@ -436,6 +436,23 @@ module.exports=function(app){
 		});
 	});
 	
+	app.post("/api/getGasPrice",function(req,res){
+		var isParameter=helper.isParameter(req.body, ['addresFrom','addresTo',"value"]);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
+		}
+		new Promise(async (resolve, reject) => {
+			var gasprice = await web3.eth.getGasPrice(),
+			gasUsed = await gasForATransaction(req.body.addresFrom,req.body.addresTo,req.body.value);
+			var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
+			
+			var statusCode = (res.statusCode==200)? true : false;
+			var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+			res.send(helper.response(statusCode,message,{"fee":amountMustPay,"unit":"ETH"}));
+		});
+	});
+	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
 	}
