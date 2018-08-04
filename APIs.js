@@ -418,21 +418,37 @@ module.exports=function(app){
 		}
 	});
 	
-	app.post('/api/testbuy', function(req, res){
-		var statusCode = (res.statusCode==200)? true : false;
-		var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-
-		var isParameter=helper.isParameter(req.body, ['phase','value']);
+	app.post("/api/buyCGN",function(req,res){
+		var isParameter=helper.isParameter(req.body, ['addres','privateKey',"toAddress",'value']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
 		}
-		connection.query(querySQL.smartContract,[2],function (error, results) {
-			var transaction = sendSignedTransaction(results[0].OwnerAddress,results[0].Address, descryptionPrivateKey(results[0].PrivateKey), null,1);
-			
-			transaction.tokenToBuy= 2;
-			transaction.rate = 200;
-			res.send(helper.response(statusCode,message,transaction));
+		connection.query(querySQL.fundraising,[1],function (error, results) {
+			web3.eth.getBalance(req.body.addres).then(function(eth){
+				new Promise(async (resolve, reject) => {
+					var gasprice = await web3.eth.getGasPrice(),
+					gasUsed = await gasForATransaction(req.body.addres,results[0].Address,eth);
+					var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
+					var amountToSend =  parseInt(req.body.value) + parseFloat(amountMustPay);
+					//console.log(amountToSend);
+					if(amountToSend>parseFloat(web3.utils.fromWei(eth))){
+						var temporary = {
+							"YourBalance" : web3.utils.fromWei(eth),
+							"Fees":amountMustPay,
+							"Amount":req.body.value,
+							"TotalPayable" : amountToSend
+							};
+						res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
+					}else{
+						sendSignedTransaction(req.body.addres,results[0].Address, descryptionPrivateKey(req.body.privateKey), null,web3.utils.toWei(amountToSend+"")).then(result=>{
+							var statusCode = (res.statusCode==200)? true : false;
+							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+							res.send(helper.response(statusCode,message,result));
+						});
+					}
+				});
+			});
 		});
 	});
 	
