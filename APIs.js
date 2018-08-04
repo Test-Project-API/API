@@ -419,16 +419,16 @@ module.exports=function(app){
 	});
 	
 	app.post("/api/buyCGN",function(req,res){
-		var isParameter=helper.isParameter(req.body, ['addres','privateKey','value']);
+		var isParameter=helper.isParameter(req.body, ['address','privateKey','value']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
 		}
 		connection.query(querySQL.fundraising,[1],function (error, results) {
-			web3.eth.getBalance(req.body.addres).then(function(eth){
+			web3.eth.getBalance(req.body.address).then(function(eth){
 				new Promise(async (resolve, reject) => {
 					var gasprice = await web3.eth.getGasPrice(),
-					gasUsed = await gasForATransaction(req.body.addres,results[0].Address,eth);
+					gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
 					var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
 					var amountToSend =  parseInt(req.body.value) + parseFloat(amountMustPay);
 					//console.log(amountToSend);
