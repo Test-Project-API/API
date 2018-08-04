@@ -25,7 +25,8 @@ connection.connect(function(err){
 });
 
 var querySQL = {
-	smartContract : "SELECT * FROM `smartcontract` WHERE `SmartContractID`=?"
+	smartContract : "SELECT * FROM `smartcontract` WHERE `SmartContractID`=?",
+	fundraising : "SELECT * FROM `fundraising` WHERE `FundRaisingID`=?"
 };
 
 module.exports=function(app){
