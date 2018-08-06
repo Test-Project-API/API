@@ -441,6 +441,7 @@ module.exports=function(app){
 							};
 						res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
 					}else{
+						console.log(descryptionPrivateKey(req.body.privateKey));
 						sendSignedTransaction(req.body.address,results[0].Address, descryptionPrivateKey(req.body.privateKey), null,web3.utils.toWei(amountToSend+"")).then(result=>{
 							var statusCode = (res.statusCode==200)? true : false;
 							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
