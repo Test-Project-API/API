@@ -469,6 +469,15 @@ module.exports=function(app){
 		});
 	});
 	
+	app.get('/api/mahoa', function(req, res){
+		res.send(helper.response(true,"",encryptionPrivateKey(req.query.key)));
+	});
+	
+	app.get('/api/giaima', function(req, res){
+		res.send(helper.response(true,"",descryptionPrivateKey(req.query.key)));
+	});
+	
+	
 	function gasForATransaction(addressFrom,AddressTo,amount){
 		return web3.eth.estimateGas({
 			from: addressFrom,
@@ -479,6 +488,9 @@ module.exports=function(app){
 	
 	function descryptionPrivateKey(key){
 		return helper.descrypt(config.keyRandom.key,key);
+	}
+	function encryptionPrivateKey(key){
+		return helper.encrypt(config.keyRandom.key,key);
 	}
 	
 	/* from : owner address
