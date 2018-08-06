@@ -536,7 +536,6 @@ module.exports=function(app){
 		}
 	}
 	
-	
 	/*
 	// helper for Web3
 	app.get("/api/getCurrenGas",function(req,res){
