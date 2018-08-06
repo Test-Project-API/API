@@ -431,8 +431,7 @@ module.exports=function(app){
 					var gasprice = await web3.eth.getGasPrice(),
 					gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
 					var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
-					var amountToSend =  parseInt(req.body.value) + parseFloat(amountMustPay);
-					//console.log(amountToSend);
+					var amountToSend =  parseFloat(req.body.value) + parseFloat(amountMustPay);
 					if(amountToSend>parseFloat(web3.utils.fromWei(eth))){
 						var temporary = {
 							"YourBalance" : web3.utils.fromWei(eth),
