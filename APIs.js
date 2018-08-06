@@ -488,8 +488,10 @@ module.exports=function(app){
 	}
 	
 	function descryptionPrivateKey(key){
-		return helper.descrypt(config.keyRandom.key,key);
+		var key = helper.descrypt(config.keyRandom.key,key).split('0x');
+		return key[1];
 	}
+	
 	function encryptionPrivateKey(key){
 		return helper.encrypt(config.keyRandom.key,key);
 	}
