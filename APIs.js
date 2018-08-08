@@ -26,7 +26,8 @@ connection.connect(function(err){
 
 var querySQL = {
 	smartContract : "SELECT * FROM `smartcontract` WHERE `SmartContractID`=?",
-	fundraising : "SELECT * FROM `fundraising` WHERE `FundRaisingID`=?"
+	fundraising : "SELECT * FROM `fundraising` WHERE `FundRaisingID`=?",
+	addTransaction : "INSERT INTO `transactioncgn`(`UserID`, `Value`, `ValueETH`, `HashKey`, `Type`, `Status`, `DateCreated`) VALUES (?,?,?,?,0,0,?)"
 };
 
 module.exports=function(app){
