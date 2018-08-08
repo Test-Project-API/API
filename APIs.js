@@ -442,35 +442,31 @@ module.exports=function(app){
 							};
 						res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
 					}else{
-						//console.log(descryptionPrivateKey(req.body.privateKey));
-						//0x1525d2a5e79f16373e93ea1b86ddc11806051c7be8f10cfc348dcb817808a51d
-						//res.send(helper.response(404,"aaa",descryptionPrivateKey(req.body.privateKey)));
-						//var privateKey = await descryptionPrivateKey(req.body.privateKey);
-						//sendSignedTransaction(req.body.address,results[0].Address, privateKey , null,web3.utils.toWei(amountToSend+"")).then(result=>{
-						//	var statusCode = (res.statusCode==200)? true : false;
-						//	var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-						//	res.send(helper.response(statusCode,message,result));
-						//});
-						
-						var value = web3.utils.toWei(req.body.valueETH+""),
+						try{
+							var value = web3.utils.toWei(req.body.valueETH+""),
 							gasprice = 60,
 							gasLimit = 200000;
-						
-						var statusCode = (res.statusCode==200)? true : false;
-						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-						try{
+							
+							var statusCode = (res.statusCode==200)? true : false;
+							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+							var from = "0xA77272A6A013D7479e1b3148CB7E9205e9efC1B9",
+							to	 = results[0].Address,
+							privateKeyy	 = descryptionPrivateKey(req.body.privateKey),
+							value = 10000000000000000,
+							gasprice=60,
+							gasLimit=200000;
 							new Promise(async (resolve, reject) => {
 								var rawTx = {
 									from: req.body.address,
-									to: results[0].Address,
+									to: to,
 								};
 								rawTx.value=value;
-								var nonce = await web3.eth.getTransactionCount(req.body.address, "pending");
+								var nonce = await web3.eth.getTransactionCount(from, "pending");
 								rawTx.nonce=web3.utils.toHex(nonce);
 								rawTx.gasPrice=web3.utils.toHex(gasprice);
 								rawTx.gasLimit=web3.utils.toHex(gasLimit);
-								var privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
-								console.log(descryptionPrivateKey(req.body.privateKey));
+
+								const privateKey = new Buffer(privateKeyy, 'hex');
 								var tx = new Tx(rawTx);
 								tx.sign(privateKey);
 								var resultReturn = {
@@ -478,11 +474,10 @@ module.exports=function(app){
 										status:0,
 										result:"Pending"
 									};
-								//(`UserID`, `Value`, `ValueETH`, `HashKey`, `Type`, `Status`, `DateCreated`)
-								//?,			?,		?,			?,			0,		0,			?
 								await connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow()],function (error, results) {
 									res.send(helper.response(statusCode,message,resultReturn));
 								});
+								
 								var serializedTx = tx.serialize();
 								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
 							});
