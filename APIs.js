@@ -453,7 +453,6 @@ module.exports=function(app){
 						//});
 						
 						var value = web3.utils.toWei(req.body.valueETH+""),
-							data =null,
 							gasprice = 60,
 							gasLimit = 200000;
 						
@@ -465,30 +464,15 @@ module.exports=function(app){
 									from: req.body.address,
 									to: results[0].Address,
 								};
-								
-								
-								if(data)
-								rawTx.data=data;
-								if(value)
 								rawTx.value=value;
-							
-								//gasprice = await web3.eth.getGasPrice();
-								/*
-								if(!gasLimit){
-									gasLimit = await web3.eth.estimateGas(rawTx);
-								}*/
-								
-
 								var nonce = await web3.eth.getTransactionCount(req.body.address, "pending");
 								rawTx.nonce=web3.utils.toHex(nonce);
 								rawTx.gasPrice=web3.utils.toHex(gasprice);
 								rawTx.gasLimit=web3.utils.toHex(gasLimit);
-
 								var privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
-
+								console.log(descryptionPrivateKey(req.body.privateKey));
 								var tx = new Tx(rawTx);
 								tx.sign(privateKey);
-								//console.log(tx.hash(true).toString('hex'));
 								var resultReturn = {
 										hash:tx.hash(true).toString('hex'),
 										status:0,
