@@ -420,7 +420,7 @@ module.exports=function(app){
 	});
 	
 	app.post("/api/buyCGN",function(req,res){
-		var isParameter=helper.isParameter(req.body, ['address','privateKey','value']);
+		var isParameter=helper.isParameter(req.body, ['address','privateKey','IDUser','valueCGN','valueETH']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
@@ -428,25 +428,77 @@ module.exports=function(app){
 		connection.query(querySQL.fundraising,[1],function (error, results) {
 			web3.eth.getBalance(req.body.address).then(function(eth){
 				new Promise(async (resolve, reject) => {
-					var gasprice = await web3.eth.getGasPrice(),
-					gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
-					var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
-					var amountToSend =  parseFloat(req.body.value) + parseFloat(amountMustPay);
-					if(amountToSend>parseFloat(web3.utils.fromWei(eth))){
+					//var gasprice = await web3.eth.getGasPrice();
+					//gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
+					//var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
+					//var amountToSend =  parseFloat(req.body.value) + parseFloat(amountMustPay);
+					if((gasCustomeETH()+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
 						var temporary = {
 							"YourBalance" : web3.utils.fromWei(eth),
-							"Fees":amountMustPay,
-							"Amount":req.body.value,
-							"TotalPayable" : amountToSend
+							"Fees":gasCustomeETH(),
+							"Amount":req.body.valueETH,
+							"TotalPayable" : gasCustomeETH()+parseFloat(req.body.valueETH)
 							};
 						res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
 					}else{
-						console.log(descryptionPrivateKey(req.body.privateKey));
-						sendSignedTransaction(req.body.address,results[0].Address, descryptionPrivateKey(req.body.privateKey), null,web3.utils.toWei(amountToSend+"")).then(result=>{
-							var statusCode = (res.statusCode==200)? true : false;
-							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-							res.send(helper.response(statusCode,message,result));
-						});
+						//console.log(descryptionPrivateKey(req.body.privateKey));
+						//0x1525d2a5e79f16373e93ea1b86ddc11806051c7be8f10cfc348dcb817808a51d
+						//res.send(helper.response(404,"aaa",descryptionPrivateKey(req.body.privateKey)));
+						//var privateKey = await descryptionPrivateKey(req.body.privateKey);
+						//sendSignedTransaction(req.body.address,results[0].Address, privateKey , null,web3.utils.toWei(amountToSend+"")).then(result=>{
+						//	var statusCode = (res.statusCode==200)? true : false;
+						//	var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+						//	res.send(helper.response(statusCode,message,result));
+						//});
+						
+						var value = web3.utils.toWei(req.body.valueETH+"");
+						var statusCode = (res.statusCode==200)? true : false;
+						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+						try{
+							new Promise(async (resolve, reject) => {
+								var rawTx = {
+									from: req.body.address,
+									to: results[0].Address,
+								};
+								var gasprice = 60;
+								if(data)
+								rawTx.data=data;
+								if(value)
+								rawTx.value=value;
+							
+								gasprice = await web3.eth.getGasPrice();
+								/*
+								if(!gasLimit){
+									gasLimit = await web3.eth.estimateGas(rawTx);
+								}*/
+								var gasLimit = 200000;
+
+								var nonce = await web3.eth.getTransactionCount(req.body.address, "pending");
+								rawTx.nonce=web3.utils.toHex(nonce);
+								rawTx.gasPrice=web3.utils.toHex(gasprice);
+								rawTx.gasLimit=web3.utils.toHex(gasLimit);
+
+								var privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
+
+								var tx = new Tx(rawTx);
+								tx.sign(privateKey);
+								//console.log(tx.hash(true).toString('hex'));
+								var resultReturn = {
+										hash:tx.hash(true).toString('hex');
+										status:0,
+										result:"Pending"
+									};
+								//(`UserID`, `Value`, `ValueETH`, `HashKey`, `Type`, `Status`, `DateCreated`)
+								//?,			?,		?,			?,			0,		0,			?
+								await connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow()],function (error, results) {
+									res.send(helper.response(statusCode,message,resultReturn));
+								});
+								var serializedTx = tx.serialize();
+								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
+							});
+						}catch(err){
+							//console.log(error);
+						}
 					}
 				});
 			});
@@ -478,6 +530,21 @@ module.exports=function(app){
 		res.send(helper.response(true,"",descryptionPrivateKey(req.query.key)));
 	});
 	
+	function gasCustomeETH(){
+		var eth = parseFloat(web3.utils.fromWei(200000+""))*parseFloat(web3.utils.toWei(60+""));
+		return web3.utils.fromWei(eth+""));
+	}
+	
+	function dateTimeNow(){
+		var currentdate = new Date();
+		var datetime = currentdate.getUTCFullYear() 
+						+ "-" + (currentdate.getUTCMonth()+1) 
+						+ "-" + currentdate.getUTCDate() 
+						+ "-" + currentdate.getUTCHours() 
+						+ "-" + currentdate.getUTCMinutes() 
+						+ "-" + currentdate.getUTCSeconds();
+		return datetime;
+	}
 	
 	function gasForATransaction(addressFrom,AddressTo,amount){
 		return web3.eth.estimateGas({
