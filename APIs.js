@@ -558,7 +558,11 @@ module.exports=function(app){
 	
 	function descryptionPrivateKey(key){
 		var key = helper.descrypt(config.keyRandom.key,key).split('0x');
-		return key[1];
+		if(key.length==2){
+			return key[1];
+		}else if(key.length==1){
+			return key[0];
+		}
 	}
 	
 	function encryptionPrivateKey(key){
