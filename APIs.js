@@ -484,7 +484,7 @@ module.exports=function(app){
 								tx.sign(privateKey);
 								//console.log(tx.hash(true).toString('hex'));
 								var resultReturn = {
-										hash:tx.hash(true).toString('hex');
+										hash:tx.hash(true).toString('hex'),
 										status:0,
 										result:"Pending"
 									};
