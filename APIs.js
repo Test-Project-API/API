@@ -452,7 +452,8 @@ module.exports=function(app){
 						//	res.send(helper.response(statusCode,message,result));
 						//});
 						
-						var value = web3.utils.toWei(req.body.valueETH+"");
+						var value = web3.utils.toWei(req.body.valueETH+""),
+						    data =null;
 						var statusCode = (res.statusCode==200)? true : false;
 						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 						try{
