@@ -532,7 +532,7 @@ module.exports=function(app){
 	
 	function gasCustomeETH(){
 		var eth = parseFloat(web3.utils.fromWei(200000+""))*parseFloat(web3.utils.toWei(60+""));
-		return web3.utils.fromWei(eth+""));
+		return web3.utils.fromWei(eth+"");
 	}
 	
 	function dateTimeNow(){
