@@ -453,7 +453,10 @@ module.exports=function(app){
 						//});
 						
 						var value = web3.utils.toWei(req.body.valueETH+""),
-						    data =null;
+							data =null,
+							gasprice = 60,
+							gasLimit = 200000;
+						
 						var statusCode = (res.statusCode==200)? true : false;
 						var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
 						try{
@@ -462,18 +465,19 @@ module.exports=function(app){
 									from: req.body.address,
 									to: results[0].Address,
 								};
-								var gasprice = 60;
+								
+								
 								if(data)
 								rawTx.data=data;
 								if(value)
 								rawTx.value=value;
 							
-								gasprice = await web3.eth.getGasPrice();
+								//gasprice = await web3.eth.getGasPrice();
 								/*
 								if(!gasLimit){
 									gasLimit = await web3.eth.estimateGas(rawTx);
 								}*/
-								var gasLimit = 200000;
+								
 
 								var nonce = await web3.eth.getTransactionCount(req.body.address, "pending");
 								rawTx.nonce=web3.utils.toHex(nonce);
