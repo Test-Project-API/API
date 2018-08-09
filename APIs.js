@@ -142,7 +142,7 @@ module.exports=function(app){
 						var jsonData = {
 							status:resultData[i].Status,
 							valueCGN: resultData[i].Value,
-							valueETH: resultData[i].ValueETH,
+							value: resultData[i].ValueETH,
 							type: resultData[i].Type,
 							timeStamp :  dateCreated.getTime()
 						}
