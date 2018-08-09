@@ -144,7 +144,7 @@ module.exports=function(app){
 							valueCGN: resultData[i].Value,
 							value: resultData[i].ValueETH,
 							type: resultData[i].Type,
-							timeStamp :  dateCreated.getTime()
+							timeStamp :  (dateCreated.getTime()/1000)
 						}
 						dataJson.result.push(jsonData);
 					}
