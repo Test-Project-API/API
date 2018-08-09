@@ -440,7 +440,7 @@ module.exports=function(app){
 	});
 	
 	app.post("/api/buyCGN",function(req,res){
-		var isParameter=helper.isParameter(req.body, ['address','privateKey','IDUser','valueCGN','valueETH']);
+		var isParameter=helper.isParameter(req.body, ['address','privateKey','IDUser','valueCGN','valueETH','PhaseID']);
 		if(isParameter.length>0){
 			statusCode = 404;
 			res.send("Missing Parameter: "+isParameter.toString());
@@ -448,10 +448,7 @@ module.exports=function(app){
 		connection.query(querySQL.fundraising,[1],function (error, results) {
 			web3.eth.getBalance(req.body.address).then(function(eth){
 				new Promise(async (resolve, reject) => {
-					//var gasprice = await web3.eth.getGasPrice();
-					//gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
-					//var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
-					//var amountToSend =  parseFloat(req.body.value) + parseFloat(amountMustPay);
+					//console.log(parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH));
 					if((parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
 						var temporary = {
 							"YourBalance" : web3.utils.fromWei(eth),
@@ -494,7 +491,7 @@ module.exports=function(app){
 										status:0,
 										result:"Pending"
 									};
-								await connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow()],function (error, results) {
+								await connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
 									res.send(helper.response(statusCode,message,resultReturn));
 								});
 								
