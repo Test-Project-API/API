@@ -478,6 +478,7 @@ module.exports=function(app){
 								var rawTx = {
 									from: req.body.address,
 									to: to,
+									nonce: 1
 								};
 								rawTx.value=value;
 								var nonce = await web3.eth.getTransactionCount(from, "pending");
