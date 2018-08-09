@@ -134,7 +134,7 @@ module.exports=function(app){
 				}
 				connection.query(querySQL.listTransaction,[req.query.UserID],function (error, results) {
 					
-					console.log(results.status);
+					//console.log(results.status);
 					var resultData = JSON.parse(JSON.stringify(results));
 					for(var i=0;i<resultData.length;i++){
 						//console.log(resultData[i].Status);
