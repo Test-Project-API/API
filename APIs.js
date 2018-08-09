@@ -109,30 +109,48 @@ module.exports=function(app){
 		});
 	
 	app.get('/api/transactionETH', function (req, res) {
-	var statusCode = (res.statusCode==200)? true : false;
-	var isParameter=helper.isParameter(req.query, ['address']);
-	if(isParameter.length>0){
-		statusCode = 404;
-		res.send("Missing Parameter: "+isParameter.toString());
-	}
-	
-	var APILink = config.apiEtherscan.testNet;
-	var queryString = httpBuildQuery({
-	module:"account",
-	action:"txlist",
-	address:req.query.address,
-	apikey:config.apiEtherscan.apikey
-	});
-	request(APILink+queryString, function (error, response, body) {
-		if(!error && response.statusCode == 200) {
-			var dataJson = JSON.parse(body);
-			var i; 
-			for(i=0;i<dataJson.result.length;i++){
-				var log = web3.utils.fromWei(dataJson.result[i].value,'ether');
-				dataJson.result[i].value = log;
-			}
-			res.send(dataJson);
+		var statusCode = (res.statusCode==200)? true : false;
+		var isParameter=helper.isParameter(req.query, ['address','UserID']);
+		if(isParameter.length>0){
+			statusCode = 404;
+			res.send("Missing Parameter: "+isParameter.toString());
 		}
+		
+		var APILink = config.apiEtherscan.testNet;
+		var queryString = httpBuildQuery({
+			module:"account",
+			action:"txlist",
+			address:req.query.address,
+			apikey:config.apiEtherscan.apikey
+		});
+		request(APILink+queryString, function (error, response, body) {
+			if(!error && response.statusCode == 200) {
+				var dataJson = JSON.parse(body);
+				var i; 
+				for(i=0;i<dataJson.result.length;i++){
+					var log = web3.utils.fromWei(dataJson.result[i].value,'ether');
+					dataJson.result[i].value = log;
+				}
+				connection.query(querySQL.listTransaction,[req.query.UserID],function (error, results) {
+					
+					console.log(results.status);
+					var resultData = JSON.parse(JSON.stringify(results));
+					for(var i=0;i<resultData.length;i++){
+						//console.log(resultData[i].Status);
+						var dateCreated = new Date(resultData[i].DateCreated);
+						var jsonData = {
+							status:resultData[i].Status,
+							valueCGN: resultData[i].Value,
+							valueETH: resultData[i].ValueETH,
+							type: resultData[i].Type,
+							DateCreated :  dateCreated.getTime()
+						}
+						dataJson.result.push(jsonData);
+					}
+					res.send(dataJson);
+				});
+				
+			}
 	    });
 	});
 	
