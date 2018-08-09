@@ -489,7 +489,7 @@ module.exports=function(app){
 										result:"Pending"
 									};
 								
-								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>(result){
+								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', (result)=>{
 									console.log(result);
 									connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
 										res.send(helper.response(statusCode,message,resultReturn));
