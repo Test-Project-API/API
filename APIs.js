@@ -465,39 +465,37 @@ module.exports=function(app){
 							
 							var statusCode = (res.statusCode==200)? true : false;
 							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-							var from = "0xA77272A6A013D7479e1b3148CB7E9205e9efC1B9",
+							//var from = "0xA77272A6A013D7479e1b3148CB7E9205e9efC1B9",
 							to	 = results[0].Address,
-							privateKeyy	 = descryptionPrivateKey(req.body.privateKey),
 							value = 10000000000000000,
 							gasprice=60,
-							gasLimit=200000;
-							new Promise(async (resolve, reject) => {
+							gasLimit=200000,
+							privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
+							
+							//new Promise(async (resolve, reject) => {
 								var rawTx = {
-									from: req.body.address,
 									to: to,
-									nonce: 1
+									nonce: 1,
+									gasPrice:gasprice,
+									gasLimit:gasLimit,
+									value:value
 								};
-								rawTx.value=value;
-								var nonce = await web3.eth.getTransactionCount(from, "pending");
-								rawTx.nonce=web3.utils.toHex(nonce);
-								rawTx.gasPrice=web3.utils.toHex(gasprice);
-								rawTx.gasLimit=web3.utils.toHex(gasLimit);
-
-								const privateKey = new Buffer(privateKeyy, 'hex');
 								var tx = new Tx(rawTx);
 								tx.sign(privateKey);
+								var serializedTx = tx.serialize();
 								var resultReturn = {
 										hash:tx.hash(true).toString('hex'),
 										status:0,
 										result:"Pending"
 									};
-								await connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
-									res.send(helper.response(statusCode,message,resultReturn));
-								});
 								
-								var serializedTx = tx.serialize();
-								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>resolve(result));
-							});
+								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', result=>(result){
+									console.log(result);
+									connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
+										res.send(helper.response(statusCode,message,resultReturn));
+									});
+								});
+							//});
 						}catch(err){
 							//console.log(error);
 						}
