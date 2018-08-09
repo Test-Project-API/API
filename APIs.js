@@ -452,7 +452,7 @@ module.exports=function(app){
 					//gasUsed = await gasForATransaction(req.body.address,results[0].Address,eth);
 					//var amountMustPay = web3.utils.fromWei(gasUsed*gasprice+"","ether");
 					//var amountToSend =  parseFloat(req.body.value) + parseFloat(amountMustPay);
-					if((gasCustomeETH()+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
+					if((parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
 						var temporary = {
 							"YourBalance" : web3.utils.fromWei(eth),
 							"Fees":gasCustomeETH(),
