@@ -29,8 +29,8 @@ var querySQL = {
 	fundraising : "SELECT * FROM `fundraising` WHERE `FundRaisingID`=?",
 	addTransaction : "INSERT INTO `transactioncgn`(`UserID`, `Value`, `ValueETH`, `HashKey`, `Type`, `Status`, `DateCreated`,PhaseID) VALUES (?,?,?,?,0,0,?,?)",
 	listTransaction : "SELECT * FROM `transactioncgn` WHERE `UserID`=?",
-	updateTransaction : "UPDATE `transactioncgn` SET `Status`=1 where `HashKey`=?"
-};
+	updateTransaction : "UPDATE `transactioncgn` SET `Status`=? where `HashKey`=?"
+}
 
 module.exports=function(app){
 	
@@ -489,7 +489,7 @@ module.exports=function(app){
 								console.log(result);
 								if(resultReturn.hash==result.transactionHash){
 									console.log("Giao dich thanh cong... "+result.transactionHash);
-									connection.query(querySQL.updateTransaction,[result.transactionHash],function (error, results) {
+									connection.query(querySQL.updateTransaction,[result.status,result.transactionHash],function (error, results) {
 										console.log("Cap nhat thanh cong... "+results);
 									});
 								}
