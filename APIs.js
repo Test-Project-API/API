@@ -447,60 +447,54 @@ module.exports=function(app){
 		}
 		connection.query(querySQL.fundraising,[1],function (error, results) {
 			web3.eth.getBalance(req.body.address).then(function(eth){
-				new Promise(async (resolve, reject) => {
-					//console.log(parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH));
-					if((parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
-						var temporary = {
-							"YourBalance" : web3.utils.fromWei(eth),
-							"Fees":gasCustomeETH(),
-							"Amount":req.body.valueETH,
-							"TotalPayable" : gasCustomeETH()+parseFloat(req.body.valueETH)
+				//console.log(parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH));
+				if((parseFloat(gasCustomeETH())+parseFloat(req.body.valueETH))>parseFloat(web3.utils.fromWei(eth))){
+					var temporary = {
+						"YourBalance" : web3.utils.fromWei(eth),
+						"Fees":gasCustomeETH(),
+						"Amount":req.body.valueETH,
+						"TotalPayable" : gasCustomeETH()+parseFloat(req.body.valueETH)
+					};
+					res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
+				}else{
+					var statusCode = (res.statusCode==200)? true : false;
+					var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
+					var privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
+					web3.eth.getTransactionCount(req.body.address).then((nonce)=>{
+						var rawTx = {
+							  nonce: nonce,
+							  gasPrice: web3.utils.toHex(60),
+							  gasLimit: web3.utils.toHex(200000),
+							  to: results[0].Address,
+							  value: web3.utils.toWei(req.body.valueETH+""),
+							  data: ''
 							};
-						res.send(helper.response(false,"Fees and balance for transactions are not sufficient for the transaction",temporary));
-					}else{
-						try{
-							var value = web3.utils.toWei(req.body.valueETH+""),
-							gasprice = 60,
-							gasLimit = 200000;
-							
-							var statusCode = (res.statusCode==200)? true : false;
-							var message = (res.statusCode==200)? "Successful!" : "Error, please try again!";
-							//var from = "0xA77272A6A013D7479e1b3148CB7E9205e9efC1B9",
-							to	 = results[0].Address,
-							value = 10000000000000000,
-							gasprice=60,
-							gasLimit=200000,
-							privateKey = new Buffer(descryptionPrivateKey(req.body.privateKey), 'hex');
-							
-							//new Promise(async (resolve, reject) => {
-								var rawTx = {
-									to: to,
-									nonce: 1,
-									gasPrice:gasprice,
-									gasLimit:gasLimit,
-									value:value
+							web3.eth.estimateGas(rawTx).then((result)=>{
+								//console.log(result);
+							});
+							var tx = new Tx(rawTx);
+							tx.sign(privateKey);
+							var serializedTx = tx.serialize();
+							var resultReturn = {
+									hash:"0x"+tx.hash(true).toString('hex'),
+									status:0,
+									result:"Pending"
 								};
-								var tx = new Tx(rawTx);
-								tx.sign(privateKey);
-								var serializedTx = tx.serialize();
-								var resultReturn = {
-										hash:tx.hash(true).toString('hex'),
-										status:0,
-										result:"Pending"
-									};
-								
-								web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', (result)=>{
-									console.log(result);
-									connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
-										res.send(helper.response(statusCode,message,resultReturn));
+							//console.log(tx.hash(true).toString('hex'));
+							connection.query(querySQL.addTransaction,[req.body.IDUser,req.body.valueCGN,req.body.valueETH,"0x"+tx.hash(true).toString('hex'),dateTimeNow(),req.body.PhaseID],function (error, results) {
+								res.send(helper.response(statusCode,message,resultReturn));
+							});
+							web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex')).on('receipt', (result)=>{
+								console.log(result);
+								if(resultReturn.hash==result.transactionHash){
+									console.log("Giao dich thanh cong... "+result.transactionHash);
+									connection.query(querySQL.updateTransaction,[result.transactionHash],function (error, results) {
+										console.log("Cap nhat thanh cong... "+results);
 									});
-								});
-							//});
-						}catch(err){
-							//console.log(error);
-						}
-					}
-				});
+								}
+							});
+					});
+				}
 			});
 		});
 	});
