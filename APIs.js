@@ -28,7 +28,8 @@ var querySQL = {
 	smartContract : "SELECT * FROM `smartcontract` WHERE `SmartContractID`=?",
 	fundraising : "SELECT * FROM `fundraising` WHERE `FundRaisingID`=?",
 	addTransaction : "INSERT INTO `transactioncgn`(`UserID`, `Value`, `ValueETH`, `HashKey`, `Type`, `Status`, `DateCreated`) VALUES (?,?,?,?,0,0,?)",
-	listTransaction : "SELECT * FROM `transactioncgn` WHERE `UserID`=?"
+	listTransaction : "SELECT * FROM `transactioncgn` WHERE `UserID`=?",
+	updateTransaction : "UPDATE `transactioncgn` SET `Status`=1 where `HashKey`=?"
 };
 
 module.exports=function(app){
