@@ -140,12 +140,13 @@ module.exports=function(app){
 					for(var i=0;i<resultData.length;i++){
 						//console.log(resultData[i].Status);
 						var dateCreated = new Date(resultData[i].DateCreated);
+						var currentdate = new Date(convertDatetime(resultData[i].DateCreated)); 
 						var jsonData = {
 							status:resultData[i].Status,
 							valueCGN: resultData[i].Value,
 							value: resultData[i].ValueETH,
 							type: resultData[i].Type,
-							timeStamp :  (dateCreated.getTime()/1000)
+							timeStamp : dateToUnix(currentdate.getFullYear(), currentdate.getMonth()+1, currentdate.getDate(), currentdate.getHours(), currentdate.getMinutes(), currentdate.getSeconds())
 						}
 						dataJson.result.push(jsonData);
 					}
@@ -153,7 +154,7 @@ module.exports=function(app){
 				});
 				
 			}
-	    });
+		});
 	});
 	
 	app.get('/api/getPhaseBonus', function (req, res) {
@@ -529,6 +530,21 @@ module.exports=function(app){
 						+ "-" + currentdate.getUTCHours() 
 						+ "-" + currentdate.getUTCMinutes() 
 						+ "-" + currentdate.getUTCSeconds();
+		return datetime;
+	}
+	
+	function dateToUnix(year, month, day, hour, minute, second) {
+	    return ((new Date(Date.UTC(year, month - 1, day, hour, minute, second))).getTime() / 1000.0);
+	}
+
+	function convertDatetime(data){
+		var currentdate = new Date(data); 
+		var datetime = currentdate.getFullYear()+"-"
+		+(currentdate.getMonth()+1) + "-"
+		+ currentdate.getDate() +  " "  
+		+ currentdate.getHours() + ":"  
+		+ currentdate.getMinutes() + ":" 
+		+ currentdate.getSeconds();
 		return datetime;
 	}
 	
